@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自己紹介</title>
+  <style>
+    * {
+      --body-background-color: rgba(0, 200, 255, 0.1);
+      --header-background-color: rgba(0, 255, 255, 0.54);
+      --header-text-color: darkgray;
+      --card-background-color: rgba(0, 255, 255, 0.15);
+      --card-title-color: rgba(64, 64, 64, 0.9);
+    }
+    body {
+        margin: 0;
+        overflow: hidden;
+
+        background-color: var(--body-background-color);
+    }
+
+    .login-modal {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform: translateX(-1.5px) translateY(-1px);
+        
+        border: solid;
+        background-color: black;
+        outline: none;
+
+        padding: 5%;
+        color: azure;
+        font-size: 1.6em;
+    }
+    main {
+        display: none; /* default */
+    }
+
+    ul {
+        margin: 0;
+        word-break: break-all;
+    }
+    li {
+      margin-right: 5%;
+    }
+
+    .header {
+        position: absolute;
+        width: 100%;
+        height: 15%;
+
+        border-bottom: solid;
+        display: flex;
+        background-color: var(--header-background-color);
+        color: var(--header-text-color);
+    }
+
+    .title-column {
+        position: relative;
+        width: 40%;
+    }
+    .title {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateY(-50%);
+    }
+    .title-line {
+        margin: 0;
+        text-align: center;
+
+        font-size: 1.5em;
+        font-weight: 800;
+    }
+
+    .name-column {
+        position: relative;
+        width: 60%;
+        margin: 0;
+        
+        text-align: center;
+    }
+    .my-name {
+        position: absolute;
+        bottom: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+
+        font-size: 1.1em;
+        font-weight: 100;
+    }
+
+    .card {
+        position: absolute;
+        width: 90%;
+        height: 35%;
+        left: 5%;
+
+        background-color: var(--card-background-color);
+        border-radius: 10px;
+        box-shadow: 5px 5px 10px 0 rgba(100, 100, 100, 0.8);
+    }
+    .background-card {
+        top: 20%;
+    }
+    .hobby-card {
+        top: 60%;
+    }
+    .card-title {
+        margin: 5% 0 0 5%;
+
+        color: var(--card-title-color);
+        text-decoration: underline;
+        text-underline-offset: 5%;
+    }
+  </style>
+</head>
+<body onload="handleLoginCache()">
+  <textarea class="login-modal" oninput="checkInput()"></textarea>
+  <main>
+    <div class="header">
+      <div class="title-column">
+        <div class="title">
+          <p class="title-line">自己</p>
+          <p class="title-line">紹介</p>
+        </div>
+      </div>
+      <div class="name-column">
+        <p class="my-name">名前</p>
+      </div>
+    </div>
+    <span>
+      <div class="card background-card">
+        <h2 class="card-title">来歴</h2>
+        <ul class="card-ul">
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      </div>
+      <div class="card hobby-card">
+        <h2 class="card-title">趣味</h2>
+        <ul class="card-ul">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      </div>
+    </span>
+  </main>
+  <script>
+    const strageKey = 'loggedInSelfIntroduction'
+    const devLoginCommand = 'login -d\n'
+    const loginModal = document.getElementsByTagName('textarea')[0]
+    const apiURL = '' /* undefined */
+
+    function handleLoginCache() {
+      let loginMemory = sessionStorage.getItem(strageKey)
+      if (loginMemory==='yes') {
+        login()
+      } 
+    }
+    function checkInput() {
+      const inputCommand = loginModal.value
+      if (inputCommand[-1]==='\n') {
+        verifyInnputCommand(inputCommand)
+        /*
+        login()
+        sessionStorage.setItem(strageKey, 'yes')
+        */
+      }
+    }
+
+    async function verifyInnputCommand(command) {
+      const queryParams = new URLSearchParams({ command: command })
+      fetch(`${apiURL}?${queryParams}`)
+       .then(res => res.json())
+       .then(res => {
+         console.log(res)
+       })
+    }
+    function login() {
+      loginModal.style.display = 'none'
+      document.getElementsByTagName('main')[0].style.display = 'initial'
+    }
+  </script>
+</body>
+</html>
