@@ -128,55 +128,103 @@
         </div>
       </div>
       <div class="name-column">
-        <p class="my-name">名前</p>
+        <p class="my-name"></p>
       </div>
     </div>
     <span>
       <div class="card background-card">
         <h2 class="card-title">来歴</h2>
         <ul class="card-ul">
-          <li></li>
-          <li></li>
-          <li></li>
         </ul>
       </div>
       <div class="card hobby-card">
         <h2 class="card-title">趣味</h2>
         <ul class="card-ul">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
         </ul>
       </div>
     </span>
   </main>
   <script>
-    const strageKey = 'loggedInSelfIntroduction'
-    const devLoginCommand = 'login -d\n'
+    const strageKeyBody = 'SelfIntroduction'
+    const devLoginCommand = 'login --dev'
+
     const loginModal = document.getElementsByTagName('textarea')[0]
-    const apiURL = '' /* undefined */
+    const myNameArea = document.getElementsByTagName('p')[2]
+    const ulElems = document.getElementsByTagName('ul')
+    const backgroundUl = ulElems[0]
+    const hobbyUl = ulElems[1]
+
+
+    // dev
+    const apiURL = 'http://localhost:3000'
+
+    let pastInputLen = 0
 
     function handleLoginCache() {
-      let loginMemory = sessionStorage.getItem(strageKey)
+      // dev
+      let loginMemory = checkStrage('loggedin')
+
+      console.log(loginMemory)
       if (loginMemory==='yes') {
-        login()
+        loginWith(
+          checkStrage('myname'),
+          checkStrage('background').split(','),
+          checkStrage('hobby').split(',')
+        )
       } 
     }
     function checkInput() {
-      const inputCommand = loginModal.value
-      if (inputCommand[-1]==='\n') {
-        verifyInnputCommand(inputCommand)
+      const allInputCommands = loginModal.value
+      const inputCommand = allInputCommands.slice(pastInputLen)
+      if (inputCommand.slice(-1)==='\n') {
+        verify({ command: inputCommand.slice(0, -1) })
+         .then(res => {
+           // --dev--
+           console.log(res)
+           console.log(res["loggedin"])
+           console.log(res["myname"])
+           console.log(res["background"])
+           console.log(res["hobby"])
+           // -------
+           if (res["loggedin"] === 'yes') {
+             loginWith(res["myname"], res["background"], res["hobby"])
+             Object.keys(res).forEach(keyName => {
+               sessionStorage.setItem(strageKeyBody+keyName, res[keyName])
+               /*
+               ここで、sesssionStrage の value は string しか許されないため、
+               配列は自動的に csv 形式の文字列に変換されて格納される
+               */
+             })
+           } else {
+             pastInputLen = allInputCommands.length
+           }
+         })
       }
     }
 
-    async function verifyInnputCommand(command) {
-      const queryParams = new URLSearchParams({ command: command })
-      fetch(`${apiURL}?${queryParams}`)
-       .then(res => res.json())
-       .then(res => {
-         console.log(res)
-       })
+    function checkStrage(key) {
+      return sessionStorage.getItem(strageKeyBody+key)
+    }
+    async function verify(data) {
+      const responseBody = await fetch(apiURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      return responseBody.json()
+    }
+    function loginWith(myName, backgroundData, hobbyData) {
+      myNameArea.appendChild(document.createTextNode(myName))
+      backgroundData.forEach(bg => {
+        newBackgroundLi = document.createElement('li')
+        newBackgroundLi.appendChild(document.createTextNode(bg))
+        backgroundUl.appendChild(newBackgroundLi)
+      })
+      hobbyData.forEach(hb => {
+        newHobbyLi = document.createElement('li')
+        newHobbyLi.appendChild(document.createTextNode(hb))
+        hobbyUl.appendChild(newHobbyLi)
+      })
+      login()
     }
     function login() {
       loginModal.style.display = 'none'
